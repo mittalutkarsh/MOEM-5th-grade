@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MOEMS Problem of the Week</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet"><style>
+/* Math notebook: graph-paper ground, navy fountain-pen ink, a yellow highlighter, a red correction pen.
+   Two typefaces: Atkinson Hyperlegible (text, built for young readers) and Kalam (the handwritten voice). */
+:root{
+  --paper:#FBFCFE; --sheet:#FFFFFF; --rule:#DCE5F2; --rule2:#C9D6EA;
+  --ink:#1C2A4A; --pencil:#5E6A82; --faint:#8E99AE;
+  --hl:#FFE45E; --hl-soft:#FFF4B8; --red:#C23A2E; --green:#1E7A50; --blue:#2D6BD0;
+  --p1:#2D6BD0; --p2:#D98A00; --p3:#7B4CC0; --p4:#1E7A50; --p5:#138A8A; --p6:#C2407A;
+  --console:#14223F; --console-ink:#DDE6F6;
+  --hand:"Kalam","Comic Neue","Segoe Print",cursive;
+  --text:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r-sm:5px; --r-md:9px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
+body.reading{background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px);
+  background-size:26px 26px;background-attachment:local}
+a{color:var(--blue)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:3px}
+h1,h2,h3{font-family:var(--hand);font-weight:700;line-height:1.15;color:var(--ink);margin:0 0 .4em}
+h1{font-size:2.5rem}
+h2{font-size:1.9rem}
+h3{font-size:1.4rem}
+.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,transparent 92%)}
+button{font:inherit;cursor:pointer}
+.btn{border:1.5px solid var(--ink);background:var(--sheet);color:var(--ink);border-radius:var(--r-sm);padding:.35em .8em;font-size:.95rem}
+.btn:hover{background:var(--hl-soft)}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.primary:hover{background:#2B3E68}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.warn{border-color:var(--red);color:var(--red)}
+kbd{font-family:var(--text);border:1px solid var(--rule2);border-bottom-width:2px;border-radius:4px;padding:0 .3em;font-size:.85em}
+
+/* ---------- equations ---------- */
+.eq{font-size:1.35rem;text-align:center;padding:.7em .6em;margin:.2em 0 1em;border-left:4px solid var(--ink);
+  background:var(--sheet);display:flex;flex-wrap:wrap;gap:.35em;align-items:center;justify-content:center}
+.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 .15em}
+.frac>span:first-child{border-bottom:1.5px solid var(--ink);padding:0 .25em}
+.frac>span:last-child{padding:0 .25em}
+.binom{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;padding:0 .35em;position:relative;line-height:1.1}
+.binom::before,.binom::after{content:"";position:absolute;top:0;bottom:0;width:.35em;border:1.5px solid var(--ink)}
+.binom::before{left:0;border-right:none;border-radius:.6em 0 0 .6em}
+.binom::after{right:0;border-left:none;border-radius:0 .6em .6em 0}
+.eqnote{font-size:.85rem;color:var(--pencil)}
+
+/* ---------- SVG pictures ---------- */
+svg.pic{width:100%;height:auto;max-height:340px;display:block;margin:0 auto;font-family:var(--text);overflow:visible}
+.pic .t,.pic .cap{fill:var(--pencil);font-size:12px}
+.pic .vert{writing-mode:tb}
+.pic .chip{fill:#fff;stroke:var(--ink);stroke-width:1.3}
+.pic .chip.picked{fill:var(--hl);stroke:var(--ink)}
+.pic .chip.used{fill:#EEF1F6;stroke:#B6BECC}
+.pic .chip.banned{fill:#FBE9E7;stroke:var(--red)}
+.pic .chiptxt{fill:var(--ink);font-size:13px;font-weight:700}
+.pic .chiptxt.used{fill:#9AA4B5}
+.pic .strike{stroke-width:2;stroke-linecap:round}
+.pic .strike.used{stroke:#9AA4B5}
+.pic .strike.banned{stroke:var(--red)}
+.pic .strike.big{stroke-width:3.5;opacity:.85}
+.pic .sub{font-size:9px}
+.pic .chip.p1,.pic .tile.p1{fill:#E1ECFC;stroke:var(--p1)}
+.pic .chip.p2,.pic .tile.p2{fill:#FCEFD6;stroke:var(--p2)}
+.pic .chip.p3,.pic .tile.p3{fill:#ECE3F8;stroke:var(--p3)}
+.pic .chip.p4,.pic .tile.p4{fill:#DEF1E7;stroke:var(--p4)}
+.pic .chip.p5,.pic .tile.p5{fill:#DAF0F0;stroke:var(--p5)}
+.pic .chip.p6,.pic .tile.p6{fill:#F8E1EB;stroke:var(--p6)}
+.pic .tile{fill:#fff;stroke:var(--ink);stroke-width:1.4}
+.pic .tile.real{fill:var(--hl)}
+.pic .tile.pl{fill:#F1F3F7;stroke:#9AA4B5}
+.pic .tilet{fill:var(--ink);font-size:16px;font-weight:700}
+.pic .tilet.sm{font-size:13px}
+.pic .slot{fill:#fff;stroke:var(--ink);stroke-width:1.6}
+.pic .result{fill:var(--hl);stroke:var(--ink);stroke-width:1.6}
+.pic .fracline{stroke:var(--ink);stroke-width:1.6}
+.pic .numbox{fill:#fff;stroke:var(--ink);stroke-width:1.2}
+.pic .slotlab{fill:var(--pencil);font-size:12px}
+.pic .slotn,.pic .calcn{fill:var(--ink);font-size:20px;font-weight:700}
+.pic .op{fill:var(--ink);font-size:22px;font-weight:700}
+.pic .op.big{font-size:30px}
+.pic .card{fill:#fff;stroke:var(--rule2)}
+.pic .arrow{stroke:var(--ink);stroke-width:2;fill:none}
+.pic .ahead{fill:var(--ink)}
+.pic .groupbox{fill:var(--hl-soft);stroke:var(--ink);stroke-width:1.6}
+.pic .groupt{fill:var(--ink);font-size:17px;font-weight:700}
+.pic .pg-cell{fill:#fff;stroke:var(--rule2);stroke-width:1}
+.pic .pg-cell.diag{fill:#FBE9E7}
+.pic .pg-cell.lower{fill:#EEF1F6}
+.pic .pg-cell.hl,.pic .pg-cell.twin-lit{fill:var(--hl);stroke:var(--ink)}
+.pic .pg-cell:hover{stroke:var(--ink);stroke-width:2}
+.pic .pgt{fill:var(--ink);pointer-events:none}
+.pic .pgt.dim{fill:#9AA4B5}
+.pic .gridlab{fill:var(--ink);font-size:13px;font-weight:700}
+.pic .edge{stroke:var(--pencil);stroke-width:1.3}
+.pic .tnode{fill:#fff;stroke:var(--rule2)}
+.pic .nodet{fill:var(--ink);font-size:12px;font-weight:700}
+.pic .node.root{fill:var(--ink)}
+.pic .rowhl{fill:var(--hl-soft)}
+.pic .brace{fill:none;stroke:var(--ink);stroke-width:1.6}
+.pic .seg{stroke:var(--faint);stroke-width:1.6}
+.pic .seg.hl{stroke:var(--blue);stroke-width:4;stroke-linecap:round;opacity:.85}
+.pic .seg.hl2{stroke:var(--p2);stroke-width:4;stroke-linecap:round;opacity:.8}
+.pic .dot{fill:var(--ink)}
+.pic .dotlab{fill:var(--ink);font-size:13px;font-weight:700}
+.pic .gl{stroke:var(--rule2);stroke-width:1.3}
+.pic .gl.hlv{stroke:var(--blue);stroke-width:3.5}
+.pic .gl.hlh{stroke:var(--green);stroke-width:3.5}
+.pic .numv{fill:var(--blue);font-weight:700}
+.pic .numh{fill:var(--green);font-weight:700}
+.pic .shade{fill:var(--hl);opacity:.6}
+.pic .path{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.pic .path.leg1{stroke:var(--blue)}
+.pic .path.leg2{stroke:var(--p2);stroke-dasharray:7 4}
+.pic .bag{fill:#F4F7FC;stroke:var(--ink);stroke-width:1.5}
+.pic .oval{fill:none;stroke:var(--hl);stroke-width:8;opacity:.9}
+.pic .oval.diff{stroke:#F2C2BC}
+.pic .lcell{fill:#fff;stroke:var(--rule2)}
+.pic .lcell.hl{fill:var(--hl)}
+.pic .lt{fill:var(--ink);font-size:13px;font-weight:700}
+.pic .wcard{fill:#fff;stroke:var(--ink);stroke-width:1.4}
+.pic .wcard.skip{fill:#F3F5F9;stroke:#B6BECC;stroke-dasharray:5 4}
+.pic .cardt{fill:var(--ink);font-size:15px}
+.pic .coin.gold{fill:#F7D774;stroke:#9A7400}
+.pic .coin.silver{fill:#E3E7EE;stroke:#7D8696}
+.pic .coint{fill:var(--ink);font-size:11px;font-weight:700}
+.pic .badring{fill:none;stroke:var(--red);stroke-width:2.5}
+.pic .state{fill:#fff;stroke:var(--rule2)}
+.pic .state.picked{fill:var(--hl-soft);stroke:var(--ink)}
+.pic .person{fill:var(--hl-soft);stroke:var(--ink)}
+.pic .persont{fill:var(--ink);font-weight:700;font-size:13px}
+.hstack{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;width:100%}
+.hstack>svg.pic{width:100%;flex:1 1 200px;min-width:0}
+.vstack{display:flex;flex-direction:column;gap:8px;align-items:center;width:100%}
+.vstack>svg.pic{width:100%}
+.ptable{border-collapse:collapse;margin:0 auto;font-size:.92rem;background:#fff}
+.ptable th,.ptable td{border:1px solid var(--rule2);padding:.25em .6em;text-align:center}
+.ptable th{background:#EEF3FA;font-weight:700}
+.ptable tr.hl td{background:var(--hl-soft);font-weight:700}
+
+/* ---------- story component ---------- */
+.story{container-type:inline-size;background:var(--sheet);border:1.5px solid var(--ink);border-radius:var(--r-md);padding:.8rem;margin:.6rem 0 1.2rem}
+.story:focus-visible{outline:3px solid var(--blue)}
+.story .frame{display:none;margin:0}
+.story .frame.on{display:block}
+.story.all .frame{display:block;border-bottom:1px dashed var(--rule2);padding-bottom:.8rem;margin-bottom:.8rem}
+.frame .pic-wrap{min-height:80px;display:flex;align-items:center;justify-content:center;overflow-x:auto}
+.frame figcaption{margin-top:.5rem}
+.frame figcaption p{margin:.2em 0}
+.frame .ftitle{font-family:var(--hand);font-size:1.15rem;margin:0 0 .3rem}
+.frame.skip .ftitle{text-decoration:line-through;color:var(--faint)}
+.frame.skip figcaption p{color:var(--pencil)}
+.ask{margin-top:.5rem;padding:.4rem .7rem;border-left:4px solid var(--hl);background:#FFFBE6;font-size:.95rem}
+.ask b{font-family:var(--hand)}
+.story-ctl{display:flex;align-items:center;gap:.6rem;margin-top:.6rem;flex-wrap:wrap}
+.dots{display:flex;gap:5px;flex-wrap:wrap}
+.dots button{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink);background:#fff;padding:0}
+.dots button.on{background:var(--ink)}
+.dots button.seen{background:var(--rule2)}
+.story-ctl label{font-size:.9rem;color:var(--pencil);margin-left:auto}
+.story.all .story-ctl .nav{visibility:hidden}
+
+/* plan-guided: flowchart beside picture on wide containers, step strip on narrow */
+.wbody{display:block}
+.plan-side{display:none}
+.plan-strip{display:flex;gap:4px;align-items:center;margin-bottom:.6rem;flex-wrap:wrap}
+.plan-strip span{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--rule2);display:inline-flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.85rem;color:var(--pencil)}
+.plan-strip span.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.plan-strip span.skipd{text-decoration:line-through}
+.plan-strip .stepname{font-family:var(--hand);font-size:1.1rem;color:var(--ink);margin-left:.4rem;width:auto;height:auto;border:none;justify-content:flex-start}
+@container (min-width:680px){
+  .wbody{display:grid;grid-template-columns:215px 1fr;gap:1rem}
+  .plan-side{display:block}
+  .plan-strip{display:none}
+}
+.plan-side ol{list-style:none;margin:0;padding:0;counter-reset:pl}
+.plan-side li{counter-increment:pl;padding:.35rem .5rem .35rem 2.1rem;position:relative;font-size:.9rem;color:var(--pencil);border-radius:6px;margin-bottom:3px}
+.plan-side li::before{content:counter(pl);position:absolute;left:.4rem;top:.3rem;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--rule2);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem}
+.plan-side li.on{background:var(--hl);color:var(--ink);font-weight:700}
+.plan-side li.on::before{background:var(--ink);color:#fff;border-color:var(--ink)}
+.plan-side li.skipd{text-decoration:line-through}
+.plan-side li+li::after{content:"";position:absolute;left:1.05rem;top:-4px;height:5px;border-left:1.5px solid var(--rule2)}
+
+/* ---------- reading pages ---------- */
+.page{max-width:1180px;margin:0 auto;padding:1.4rem 1.2rem 4rem;display:grid;grid-template-columns:230px minmax(0,1fr);gap:2rem}
+.toc{position:sticky;top:1rem;align-self:start;max-height:calc(100vh - 2rem);overflow:auto;font-size:.92rem;background:var(--sheet);
+  border:1.5px solid var(--ink);border-radius:var(--r-md);padding:.8rem}
+.toc a{display:block;text-decoration:none;color:var(--ink);padding:.15rem .3rem;border-radius:4px}
+.toc a:hover{background:var(--hl-soft)}
+.toc .sub{padding-left:1rem;font-size:.86rem;color:var(--pencil)}
+main.reading-main{min-width:0}
+.sheet{background:var(--sheet);border:1.5px solid var(--ink);border-radius:var(--r-md);padding:1.3rem 1.4rem;margin-bottom:1.6rem}
+.sheet>p,.sheet li{max-width:72ch}
+.idea{font-size:1.1rem;font-weight:700}
+.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:.6rem 0}
+.chips a{border:1.5px solid var(--ink);border-radius:999px;padding:.1rem .7rem;text-decoration:none;color:var(--ink);font-size:.9rem;background:#fff}
+.chips a:hover{background:var(--hl)}
+.fromclass{border-left:4px solid var(--blue);background:#F1F6FE;padding:.6rem .8rem;margin:.8rem 0;font-size:.95rem}
+.fromclass b{font-family:var(--hand)}
+.traps{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;padding:0;list-style:none}
+.traps li{background:#fff;border:1.5px solid var(--ink);border-radius:var(--r-md);padding:.7rem .9rem;max-width:none}
+.traps .wrong{color:var(--red);font-weight:700;text-decoration:line-through;text-decoration-thickness:2px}
+.cheat{width:100%;border-collapse:collapse}
+.cheat td,.cheat th{border:1px solid var(--rule2);padding:.4rem .6rem;vertical-align:top;text-align:left}
+.cheat th{background:#EEF3FA}
+dl.gloss dt{font-weight:700;margin-top:.6rem}
+dl.gloss dd{margin:0 0 0 1rem;max-width:70ch}
+.site-head{display:flex;align-items:baseline;gap:1.2rem;flex-wrap:wrap;padding:1rem 1.2rem 0;max-width:1180px;margin:0 auto}
+.site-head nav a{margin-right:1rem}
+.lede{font-size:1.15rem;max-width:62ch}
+
+/* ---------- workbench ---------- */
+body.bench{height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;gap:.6rem;padding:.45rem .8rem;border-bottom:1.5px solid var(--ink);background:var(--sheet);flex-wrap:wrap}
+.topbar .brand{font-family:var(--hand);font-weight:700;font-size:1.25rem;margin-right:.4rem}
+.topbar select{font:inherit;font-size:.92rem;padding:.25rem;border:1.5px solid var(--ink);border-radius:var(--r-sm);max-width:280px}
+.topbar .meta{font-size:.9rem;color:var(--pencil);display:flex;gap:1rem;align-items:center}
+.topbar .links{margin-left:auto;display:flex;gap:.8rem;font-size:.92rem}
+.benchgrid{flex:1;min-height:0;display:grid;grid-template-columns:200px minmax(0,1fr) minmax(360px,430px)}
+.rail{border-right:1.5px solid var(--ink);overflow:auto;padding:.5rem;background:var(--paper)}
+.rail h4{font-family:var(--hand);font-size:1.05rem;margin:.6rem 0 .2rem}
+.rail button{display:flex;align-items:center;gap:.5rem;width:100%;text-align:left;border:none;background:none;padding:.25rem .4rem;border-radius:5px;font-size:.92rem;color:var(--ink)}
+.rail button:hover{background:var(--hl-soft)}
+.rail button.cur{background:var(--hl);font-weight:700}
+.sdot{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--pencil);flex:none}
+.sdot.prog{background:linear-gradient(90deg,var(--blue) 50%,#fff 50%);border-color:var(--blue)}
+.sdot.closed{background:var(--green);border-color:var(--green)}
+.middle{overflow:auto;padding:0 1rem 1rem;background:var(--paper)}
+.tabs{display:flex;gap:.2rem;position:sticky;top:0;background:var(--paper);padding-top:.5rem;z-index:2;border-bottom:1.5px solid var(--ink)}
+.tabs button{border:1.5px solid var(--ink);border-bottom:none;border-radius:7px 7px 0 0;background:#EEF3FA;padding:.3rem .9rem;margin-bottom:-1.5px;font-size:.95rem}
+.tabs button[aria-selected="true"]{background:var(--sheet);font-weight:700}
+.tabpanel{padding-top:.8rem}
+.ptext{font-size:1.08rem;background:var(--sheet);border:1.5px solid var(--ink);border-radius:var(--r-md);padding:.8rem 1rem}
+.pfig{max-width:380px;margin:.8rem auto 0}
+.pfig svg.pic{max-height:300px}
+.pfig .pic .gl{stroke:var(--ink);stroke-width:1.2}
+.pnote{font-size:.9rem;color:var(--pencil);margin:.5rem 0}
+.inclass{display:inline-block;font-size:.85rem;border:1px solid var(--blue);color:var(--blue);border-radius:999px;padding:0 .6rem;margin-right:.4rem}
+.above{display:inline-block;font-size:.85rem;border:1px solid var(--p3);color:var(--p3);border-radius:999px;padding:0 .6rem}
+.verified{margin-top:1rem;border:2px solid var(--green);border-radius:var(--r-md);background:#F2FAF5;padding:.8rem 1rem}
+.verified h3{color:var(--green)}
+.right{border-left:1.5px solid var(--ink);display:flex;flex-direction:column;min-height:0;background:var(--sheet)}
+.rscroll{overflow:auto;padding:.7rem .8rem;flex:1;min-height:0}
+.pills{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.5rem}
+.pills button{border:1.5px solid var(--ink);border-radius:999px;background:#fff;padding:.05rem .65rem;font-size:.88rem}
+.pills button.cur{outline:3px solid var(--hl);outline-offset:1px;font-weight:700}
+.pills button.ok{background:#DDF1E5;border-color:var(--green)}
+.pills button.handed{background:#FBE9E7;border-color:var(--red)}
+.pills button.tried{background:#EEF3FA}
+.stepq{font-weight:700;margin:.2rem 0 .5rem}
+.editor{display:flex;border:1.5px solid var(--ink);border-radius:var(--r-sm);height:140px;background:#fff;
+  background-image:linear-gradient(transparent 23px,var(--rule) 23px);background-size:100% 24px;background-position:0 6px}
+.gutter{width:2.2rem;text-align:right;padding:6px .35rem 0 0;color:var(--faint);font-size:.85rem;line-height:24px;overflow:hidden;border-right:1px solid var(--rule2);user-select:none}
+.editor textarea{flex:1;border:none;resize:none;padding:6px .5rem 0;font:inherit;font-size:.95rem;line-height:24px;background:transparent;color:var(--ink);font-family:var(--hand)}
+.editor textarea:focus{outline:none}
+.editor:focus-within{outline:3px solid var(--blue);outline-offset:1px}
+.ansrow{display:flex;gap:.4rem;margin:.6rem 0}
+.ansrow input{flex:1;font:inherit;padding:.35rem .5rem;border:1.5px solid var(--ink);border-radius:var(--r-sm);min-width:0}
+.btnrow{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem}
+.console{background:var(--console);color:var(--console-ink);font-size:.86rem;padding:.6rem .7rem;height:170px;overflow:auto;border-top:1.5px solid var(--ink);flex:none}
+.console div{margin-bottom:.3rem;line-height:1.4}
+.console .ok{color:#8BE0AC}
+.console .bad{color:#FFB3A8}
+.console .info{color:#A9C3F0}
+.console .hand{color:#FFE45E}
+.console .ts{color:#6F84AD;margin-right:.4rem}
+.dialog-back{position:fixed;inset:0;background:rgba(28,42,74,.35);display:none;align-items:center;justify-content:center;z-index:50}
+.dialog-back.open{display:flex}
+.dialog{background:var(--sheet);border:2px solid var(--ink);border-radius:var(--r-md);max-width:460px;padding:1rem 1.2rem;margin:1rem}
+.dialog h3{margin-top:0}
+.confirm-note{font-size:.88rem;color:var(--red);margin:.3rem 0}
+.rules{background:var(--sheet);border:1.5px solid var(--ink);border-radius:var(--r-md);padding:.8rem 1rem}
+.rules ol{padding-left:1.3rem;margin:.3rem 0}
+.mysteps .ms{background:var(--sheet);border:1px solid var(--rule2);border-radius:var(--r-sm);padding:.5rem .7rem;margin-bottom:.5rem}
+.mysteps pre{white-space:pre-wrap;font-family:var(--hand);margin:.3rem 0;font-size:.95rem}
+.railtoggle{display:none}
+
+/* ---------- pen ---------- */
+.pen-canvas{position:fixed;inset:0;pointer-events:none;z-index:40}
+.pen-canvas.active{pointer-events:auto;cursor:crosshair}
+.pen-canvas.active.touchpass{touch-action:pan-x pan-y pinch-zoom}
+.pen-canvas.active.swallow{touch-action:none}
+.pen-bar{position:fixed;right:12px;bottom:12px;z-index:45;background:var(--sheet);border:1.5px solid var(--ink);border-radius:var(--r-md);
+  padding:.35rem;display:flex;gap:.25rem;align-items:center;flex-wrap:wrap;max-width:calc(100vw - 24px);box-shadow:0 2px 0 var(--ink)}
+.pen-bar button{border:1.5px solid transparent;background:none;border-radius:6px;min-width:30px;height:30px;padding:0 .35rem;font-size:.85rem;color:var(--ink)}
+.pen-bar button[aria-pressed="true"]{border-color:var(--ink);background:var(--hl)}
+.pen-bar .sw{width:20px;height:20px;border-radius:50%;display:inline-block;vertical-align:middle;border:1.5px solid var(--ink)}
+.pen-bar .tools{display:none;gap:.2rem;align-items:center;flex-wrap:wrap}
+.pen-bar.open .tools{display:flex}
+.pen-bar .sep{width:1px;height:22px;background:var(--rule2);margin:0 .15rem}
+.pen-bar .note{font-size:.75rem;color:var(--pencil);max-width:170px;line-height:1.2}
+
+/* ---------- small screens ---------- */
+@media (max-width:860px){
+  .page{grid-template-columns:1fr}
+  .toc{position:static;max-height:none}
+  body.bench{height:auto;overflow:auto}
+  .benchgrid{display:block}
+  .rail{display:none;border-right:none;border-bottom:1.5px solid var(--ink)}
+  .rail.open{display:block}
+  .railtoggle{display:inline-block}
+  .middle{overflow:visible}
+  .right{border-left:none;border-top:1.5px solid var(--ink)}
+  .console{height:150px}
+  h1{font-size:2rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{
+  .pen-bar,.pen-canvas,.story-ctl,.topbar,.rail,.right,.tabs,.toc{display:none!important}
+  .story .frame{display:block!important;page-break-inside:avoid;border-bottom:1px dashed #999;padding-bottom:.6rem;margin-bottom:.6rem}
+  body.bench{height:auto;overflow:visible}
+  .benchgrid{display:block}
+  .tabpanel[hidden]{display:block!important}
+  body.reading{background:none}
+  .page{display:block}
+}
+/* final polish */
+.story.worked:not(.all) .ftitle{display:none}
+body.bench .pen-bar{right:auto;left:12px}
+
+/* MOEMS additions: the plan's own pictures. Same notebook palette as the base sheet. */
+.pic .qt{fill:var(--ink);font-size:15px}
+.pic .qlab{fill:var(--pencil);font-size:14px;font-weight:700}
+.pic .ansbox{fill:#fff;stroke:var(--ink);stroke-width:2;stroke-dasharray:5 3}
+.pic .ansq{fill:var(--faint);font-size:20px;font-weight:700}
+.pic .unittag{fill:var(--hl);stroke:var(--ink);stroke-width:1.3}
+.pic .unitt{fill:var(--ink);font-size:14px;font-weight:700}
+.pic .unit{fill:#fff;stroke:var(--ink);stroke-width:1.2}
+.pic .unit.hl{fill:var(--hl)}
+.pic .unit.give{fill:#FBE9E7;stroke:var(--red)}
+.pic .unit.ghost{fill:#F3F5F9;stroke:#B6BECC;stroke-dasharray:4 3}
+.pic .unit.big{fill:#E1ECFC;stroke:var(--p1)}
+.pic .barname{fill:var(--ink);font-size:14px;font-weight:700}
+.pic .barright{fill:var(--ink);font-size:14px;font-weight:700}
+.pic .unitlab{fill:var(--ink);font-size:12px;font-weight:700}
+.pic .bracet{fill:var(--ink);font-size:13px;font-weight:700}
+.pic .node{fill:#fff;stroke:var(--ink);stroke-width:1.6}
+.pic .node.q{fill:#F3F5F9;stroke:#9AA4B5;stroke-dasharray:4 3}
+.pic .node.hl{fill:var(--hl)}
+.pic .nodev{fill:var(--ink);font-size:18px;font-weight:700}
+.pic .fwd{fill:none;stroke:var(--pencil);stroke-width:1.6}
+.pic .fwdt{fill:var(--pencil);font-size:12.5px}
+.pic .bwd{fill:none;stroke:var(--blue);stroke-width:2.2}
+.pic .bwdt{fill:var(--blue);font-size:13.5px;font-weight:700}
+.pic .block{fill:var(--hl-soft);stroke:var(--ink);stroke-width:1.4}
+.pic .block.rem{fill:#E1ECFC;stroke:var(--p1);stroke-dasharray:5 3}
+.pic .blockt{fill:var(--ink);font-size:13px;font-weight:700}
+.pic .tseg{fill:#fff;stroke:var(--ink);stroke-width:1.3}
+.pic .tseg.gap{fill:#FBE9E7;stroke:var(--red)}
+.pic .tseg.big{fill:#E1ECFC;stroke:var(--p1)}
+.pic .tseg.ghost{fill:#F3F5F9;stroke:#B6BECC;stroke-dasharray:4 3}
+.pic .segt{fill:var(--ink);font-size:12.5px;font-weight:700}
+.pic .tick{stroke:var(--ink);stroke-width:1.3}
+.pic .tickt{fill:var(--ink);font-size:12.5px}
+.pic .axis{stroke:var(--ink);stroke-width:1.6}
+.pic .mdot{fill:#fff;stroke:var(--ink);stroke-width:1.8}
+.pic .mdot.hl{fill:var(--hl)}
+.pic .gbox{fill:#fff;stroke:var(--rule2)}
+.pic .zz{fill:none;stroke-width:2.6;stroke-linejoin:round}
+.pic .zz.z1{stroke:var(--blue)}
+.pic .zz.z2{stroke:var(--p2);stroke-dasharray:7 4}
+.pic .zl1{fill:var(--blue);font-size:12.5px;font-weight:700}
+.pic .zl2{fill:var(--p2);font-size:12.5px;font-weight:700}
+.pic .meet{fill:var(--hl);stroke:var(--ink);stroke-width:1.3}
+.pic .meett{fill:var(--ink);font-size:10px;font-weight:700}
+.pic .lotr{fill:#F4F9F1;stroke:var(--green);stroke-width:2}
+.pic .stripr{fill:var(--hl);stroke:var(--ink);stroke-width:1.2;stroke-dasharray:4 3}
+.pic .house{fill:#E1ECFC;stroke:var(--p1);stroke-width:2}
+.pic .dim{stroke:var(--ink);stroke-width:1.1}
+.pic .dimend{fill:var(--ink)}
+.pic .dimbg{fill:#fff;opacity:.92}
+.pic .dimt{fill:var(--ink);font-size:13px;font-weight:700}
+.pic .street{stroke:var(--pencil);stroke-width:4;stroke-dasharray:14 8}
+.pic.iso .cf{stroke:var(--ink);stroke-width:.9;stroke-linejoin:round}
+.pic.iso .ft{fill:#F7C9C3}.pic.iso .fl{fill:#E2867A}.pic.iso .fr{fill:#C8574A}
+.pic.iso .ft.hl{fill:#FFF1A6}.pic.iso .fl.hl{fill:#F1D14E}.pic.iso .fr.hl{fill:#D9B21F}
+.pic.iso .fade{opacity:.35}
+.pic .ball{stroke:var(--ink);stroke-width:1.4}
+.pic .ball.red{fill:#E57368}.pic .ball.green{fill:#7CC48F}.pic .ball.yellow{fill:#F6D85A}.pic .ball.purple{fill:#A98BD6}.pic .ball.blue{fill:#7FA8E8}
+.pic .ball.any{fill:#fff;stroke-dasharray:4 3}
+.pic .ball.next{stroke-width:3;stroke:var(--ink)}
+.pic .ballt{fill:var(--ink);font-size:12px;font-weight:700}
+.pic .ring{stroke:var(--ink);stroke-width:1.4}
+.pic .ring1{fill:#E1ECFC}.pic .ring2{fill:#FFF4B8}.pic .ring3{fill:#F7C9C3}
+.pic .ringt{fill:var(--ink);font-size:17px;font-weight:700}
+/* the fact ledger: plan step 4, the same table every time */
+table.ledger{border-collapse:collapse;margin:0 auto;font-size:.95rem;background:#fff;max-width:100%}
+table.ledger th,table.ledger td{border:1px solid var(--rule2);padding:.3em .6em;text-align:left;vertical-align:top}
+table.ledger th{background:#EEF3FA}
+table.ledger td.fact{font-style:italic}
+table.ledger td.tick{font-size:1.2rem;font-weight:700;text-align:center;width:2.2em}
+table.ledger td.tick.y{color:var(--green)}
+table.ledger td.tick.n{color:var(--red)}
+.wrongline{text-align:center;margin:.6rem 0 0;font-size:.95rem}
+.wrongv{color:var(--red);font-weight:700;text-decoration:line-through;text-decoration-thickness:2px;margin-right:.3em}
+.pic-wrap{flex-direction:column}
+.pic-wrap>table{max-width:100%}
+.official{background:#fff;border:1px solid var(--rule2);border-radius:var(--r-sm);padding:.5rem .8rem}
+.official p{margin:.3em 0}
+ul.srcl{margin:.2rem 0;padding-left:1.2rem;font-size:.9rem}
+pre.layout{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1rem;background:#fff;border:1px dashed var(--rule2);padding:.4rem .8rem;width:max-content;max-width:100%;overflow:auto;margin:.6rem auto 0}
+.maptable{font-size:.88rem}
+.maptable td:first-child{text-align:left}
+.maptable-wrap{overflow-x:auto}
+.pic .gridbox{fill:none;stroke:var(--blue);stroke-width:3}
+.pic .colhl{fill:var(--hl-soft);stroke:var(--hl);stroke-width:1.5}
+.pic .digit{fill:var(--ink);font-size:22px;font-weight:700;font-family:ui-monospace,Menlo,Consolas,monospace}
+.pic .digit.res{fill:var(--blue)}
+.pic .carry{fill:var(--red);font-size:14px;font-weight:700}
+/* step 1: the marked-up problem */
+.qmark{background:#fff;border:1.5px solid var(--ink);border-radius:var(--r-md);padding:.7rem .9rem;max-width:620px;margin:0 auto;font-size:1.02rem;line-height:1.75;text-align:left}
+.qmark p{margin:0 0 .5rem}
+mark.qn{background:var(--hl);color:var(--ink);padding:0 .15em;border-radius:3px;font-weight:700}
+.qt2{text-decoration:underline wavy var(--red);text-decoration-thickness:1.5px;text-underline-offset:3px}
+.qask{box-shadow:inset 0 -.55em 0 #DDEBFF}
+.qbox{display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--pencil)}
+.qans{display:inline-block;min-width:3.2em;text-align:center;border:2px dashed var(--ink);border-radius:6px;color:var(--faint);padding:0 .4em}
+.qunit{background:var(--hl);border:1.3px solid var(--ink);border-radius:999px;padding:0 .7em;color:var(--ink)}
+.qkey{display:flex;flex-wrap:wrap;gap:.9rem;font-size:.8rem;color:var(--pencil);margin-top:.5rem;border-top:1px dashed var(--rule2);padding-top:.35rem}
+.qkey mark.qn{font-weight:400}
+/* icons */
+.pic .ic{fill:#fff;stroke:var(--ink);stroke-width:1.3}
+.pic .ic.ghost{fill:#F3F5F9;stroke:#9AA4B5;stroke-dasharray:3 2}
+.pic .ic.gold{fill:#F7D774}.pic .ic.silver{fill:#E3E7EE}.pic .ic.red{fill:#E57368}.pic .ic.green{fill:#7CC48F}
+.pic .ic.yellow{fill:#F6D85A}.pic .ic.purple{fill:#A98BD6}.pic .ic.blue{fill:#7FA8E8}.pic .ic.hl{fill:var(--hl)}
+.pic .ic.stamp{stroke-dasharray:2 1.5}
+.pic .ic.give{fill:#FBE9E7;stroke:var(--red)}
+.pic .ict{fill:var(--ink);font-size:10px;font-weight:700}
+.pic .tubbody{fill:#F4F7FC;stroke:var(--ink);stroke-width:2}
+.pic .water{fill:#BFD7F5}
+.pic .pipe{fill:none;stroke:var(--pencil);stroke-width:6;stroke-linejoin:round}
+.pic .flowin{fill:none;stroke:var(--blue);stroke-width:3}
+.pic .flowout{fill:none;stroke:var(--red);stroke-width:3}
+/* hint dialog with its picture */
+.dialog{max-width:680px;max-height:90vh;overflow:auto}
+.hintpic{margin-top:.7rem;border-top:1px dashed var(--rule2);padding-top:.6rem}
+.hintpic .cap2{font-size:.85rem;color:var(--pencil);margin:0 0 .3rem}
+.hintpic svg.pic{max-height:260px}
+
+</style></head><body class="reading" data-penmode="page"><header class="site-head"><h1>MOEMS Problem of the Week</h1><nav aria-label="Site"><a href="moems-notes.html">Notes</a><a href="moems-lesson.html">Lesson</a><a href="moems-practice.html">Practice</a><a href="moems-contests.html">Contests</a></nav></header><div class="page" style="grid-template-columns:1fr;max-width:980px"><main class="reading-main"><p class="lede">Math Olympiad problems, one week at a time. Every problem gets the same four-step plan; the picture in step 2 tells you which of twelve moves to make.</p><section class="sheet" id="pages" aria-labelledby="pages-h"><div class="eq" role="math"><span>notes</span><span>→</span><span>lesson</span><span>→</span><span>practice</span><span>→</span><span>contests</span></div><h2 id="pages-h">Four pages</h2><ul><li><a href="moems-notes.html"><b>Notes</b></a>: the reading page. The plan, the twelve moves as picture stories, traps, a cheat sheet and a glossary. No grading.</li><li><a href="moems-lesson.html"><b>Lesson</b></a>: one guided problem for each of the twelve moves, each an official MOEMS contest problem. The Concept tab is open first and teaches the move with different numbers.</li><li><a href="moems-practice.html"><b>Practice</b></a>: the 23 Problems of the Week (September 2025 to February 2026), each split into steps with a worked picture story.</li><li><a href="moems-contests.html"><b>Contests</b></a>: all 265 official contest problems in the file (2019–2026, Divisions E and M), grouped by the move that most likely opens each one, so he can practise one move at a time. Answers are checked against the official key, and the official method opens afterwards.</li></ul></section><section class="sheet" id="plan" aria-labelledby="plan-h"><div class="eq" role="math"><span>answer ✓</span><span>=</span><span>every fact in the problem ✓</span></div><h2 id="plan-h">The plan</h2><p><b>Box the question → Draw every fact → Make the move → Check every fact</b>. The same four steps on every problem; only the move in step 3 changes.</p><div class="story worked" id="story48" tabindex="0" aria-label="The plan" data-plan='[&quot;Box the question&quot;, &quot;Draw every fact&quot;, &quot;Make the move&quot;, &quot;Check every fact&quot;]'><div class="wbody"><div class="plan-side" aria-hidden="true"><ol><li data-s="1">Box the question: what goes in the answer box, and in what unit?</li><li data-s="2">Draw every fact: one picture that holds every number in the problem.</li><li data-s="3">Make the move the picture shows (undo · bars · table · blocks · gaps · time block · shape · worst case · groups · cycles · digits · odd/even).</li><li data-s="4">Check every fact: put the answer back into each sentence. Each one gets a ✓.</li></ol></div><div class="wmain"><div class="plan-strip" aria-hidden="true"><span data-s="1">1</span><span data-s="2">2</span><span data-s="3">3</span><span data-s="4">4</span><span class="stepname"></span></div><figure class="frame" data-step="1"><p class="ftitle">1. Box the question</p><div class="pic-wrap"><div class="qmark" role="img" aria-label="the problem, marked up"><p>A baker puts <mark class="qn">6 </mark>muffins in <span class="qt2">each</span> box. She fills <mark class="qn">7 </mark>boxes and has <mark class="qn">5 </mark>muffins <span class="qt2">left over</span>. <span class="qask">How many muffins did she bake?</span></p><div class="qbox">Answer: <span class="qans">?</span> <span class="qunit">muffins</span></div><div class="qkey"><span><mark class="qn">12</mark> every number</span><span><span class="qt2">each</span> words that change the answer</span><span><span class="qask">question</span> what is asked</span></div></div></div><figcaption><p>Read it like a detective: every number is highlighted, the words that change the answer are underlined, and the question is marked. The box wants muffins.</p><div class="ask"><b>Ask him:</b> Which word tells you the unit?</div></figcaption></figure><figure class="frame" data-step="2"><p class="ftitle">2. Draw every fact</p><div class="pic-wrap"><svg class="pic " viewBox="0 0 420 102" role="img" aria-label="seven boxes of six muffins and five loose ones" style="max-width:609px" preserveAspectRatio="xMidYMid meet"><text x="62" y="25.0" class="barname" text-anchor="end">boxes</text><rect x="71" y="9" width="22" height="22" rx="5" class="ic hl"/><text x="82.0" y="24.0" class="ict" text-anchor="middle">6</text><rect x="101" y="9" width="22" height="22" rx="5" class="ic hl"/><text x="112.0" y="24.0" class="ict" text-anchor="middle">6</text><rect x="131" y="9" width="22" height="22" rx="5" class="ic hl"/><text x="142.0" y="24.0" class="ict" text-anchor="middle">6</text><rect x="161" y="9" width="22" height="22" rx="5" class="ic hl"/><text x="172.0" y="24.0" class="ict" text-anchor="middle">6</text><rect x="191" y="9" width="22" height="22" rx="5" class="ic hl"/><text x="202.0" y="24.0" class="ict" text-anchor="middle">6</text><rect x="221" y="9" width="22" height="22" rx="5" class="ic hl"/><text x="232.0" y="24.0" class="ict" text-anchor="middle">6</text><rect x="251" y="9" width="22" height="22" rx="5" class="ic hl"/><text x="262.0" y="24.0" class="ict" text-anchor="middle">6</text><text x="286" y="25.0" class="barright" text-anchor="start">7 boxes of 6</text><text x="62" y="71.0" class="barname" text-anchor="end">loose</text><circle cx="82.0" cy="66.0" r="11.0" class="ic yellow"/><circle cx="112.0" cy="66.0" r="11.0" class="ic yellow"/><circle cx="142.0" cy="66.0" r="11.0" class="ic yellow"/><circle cx="172.0" cy="66.0" r="11.0" class="ic yellow"/><circle cx="202.0" cy="66.0" r="11.0" class="ic yellow"/><text x="226" y="71.0" class="barright" text-anchor="start">5 left over</text></svg></div><figcaption><p>Every number from the problem goes on the picture. Nothing is solved yet.</p><div class="ask"><b>Ask him:</b> Which fact is easiest to forget?</div></figcaption></figure><figure class="frame" data-step="3"><p class="ftitle">3. Make the move</p><div class="pic-wrap"><svg class="pic " viewBox="0 0 595.6 104" role="img" aria-label="blocks" style="max-width:864px" preserveAspectRatio="xMidYMid meet"><rect x="10" y="20" width="82.60000000000001" height="38" rx="7" class="block"/><text x="51.300000000000004" y="44" class="blockt" text-anchor="middle">6 muffins</text><rect x="100.60000000000001" y="20" width="82.60000000000001" height="38" rx="7" class="block"/><text x="141.9" y="44" class="blockt" text-anchor="middle">6 muffins</text><rect x="191.20000000000002" y="20" width="82.60000000000001" height="38" rx="7" class="block"/><text x="232.50000000000003" y="44" class="blockt" text-anchor="middle">6 muffins</text><text x="297.8" y="46" class="op" text-anchor="middle">…</text><rect x="321.8" y="20" width="82.60000000000001" height="38" rx="7" class="block"/><text x="363.1" y="44" class="blockt" text-anchor="middle">6 muffins</text><path d="M10 64 q0 6 6 6 L201.20000000000002 70 l5 6 l5 -6 L398.40000000000003 70 q6 0 6 -6" class="brace"/><text x="206.20000000000002" y="92" class="bracet" text-anchor="middle">7 boxes</text><rect x="424.40000000000003" y="20" width="82.60000000000001" height="38" rx="7" class="block rem"/><text x="465.70000000000005" y="44" class="blockt" text-anchor="middle">5 muffins</text><text x="465.70000000000005" y="82" class="cap" text-anchor="middle">left over</text></svg></div><figcaption><p>Move: One block. The picture shows a repeating block (a box of 6) and a leftover.</p></figcaption></figure><figure class="frame" data-step="3"><p class="ftitle">3. Make the move</p><div class="pic-wrap"><svg class="pic " viewBox="0 0 280 70" role="img" aria-label="muffins" style="max-width:406px" preserveAspectRatio="xMidYMid meet"><rect x="10" y="16" width="83" height="40" rx="7" class="numbox"/><text x="51.5" y="43" class="calcn" text-anchor="middle">7 × 6</text><text x="116.5" y="44" class="op" text-anchor="middle">+</text><rect x="140" y="16" width="31" height="40" rx="7" class="numbox"/><text x="155.5" y="43" class="calcn" text-anchor="middle">5</text><text x="194.5" y="44" class="op" text-anchor="middle">=</text><rect x="218" y="16" width="44" height="40" rx="7" class="result"/><text x="240.0" y="43" class="calcn" text-anchor="middle">47</text></svg></div><figcaption><p>Blocks × block size, plus the leftover.</p></figcaption></figure><figure class="frame" data-step="4"><p class="ftitle">4. Check every fact</p><div class="pic-wrap"><table class="ledger"><thead><tr><th>Fact from the problem</th><th>With our answer</th><th></th></tr></thead><tbody><tr><td class="fact">6 in each box</td><td>47 = 7 × 6 + 5</td><td class="tick y">✓</td></tr><tr><td class="fact">7 boxes filled</td><td>42 muffins in boxes</td><td class="tick y">✓</td></tr><tr><td class="fact">5 left over</td><td>47 − 42 = 5</td><td class="tick y">✓</td></tr></tbody></table><p class="wrongline"><span class="wrongv">42</span> is the muffins in boxes; the 5 left over were baked too.</p></div><figcaption><p>Put the answer back into every fact. Every row gets a ✓. The crossed-out number is the tempting answer, and what it really counts.</p><div class="ask"><b>Ask him:</b> Which fact would catch a wrong answer fastest?</div></figcaption></figure></div></div><div class="story-ctl"><span class="nav"><button type="button" class="btn" data-act="back">← Back</button> <button type="button" class="btn primary" data-act="next">Next step →</button></span><span class="dots" role="group" aria-label="Pictures"></span><label><input type="checkbox" class="showall"> Show all steps</label></div></div></section><section class="sheet" id="moves" aria-labelledby="moves-h"><div class="eq" role="math"><span>step 3</span><span>=</span><span>the move the picture shows</span></div><h2 id="moves-h">The twelve moves</h2><table class="cheat"><thead><tr><th>Move</th><th>Picture</th><th>The idea</th><th>Contest problems</th></tr></thead><tbody><tr><td><a href="moems-notes.html#c1">Undo it</a></td><td>undo chain</td><td>When only the end of a story is known, walk it backwards: undo each step with its opposite, last step first.</td><td><a href="moems-contests.html#2019m1e">6</a></td></tr><tr><td><a href="moems-notes.html#c2">Bars and units</a></td><td>equal bars</td><td>Draw every amount as bars of the same size. Find what one bar is worth, then count bars.</td><td><a href="moems-contests.html#2019e3c">10</a></td></tr><tr><td><a href="moems-notes.html#c3">Table of cases</a></td><td>table of cases</td><td>When a few choices are possible, list them in order in a table and test every fact on each row.</td><td><a href="moems-contests.html#2019e1b">43</a></td></tr><tr><td><a href="moems-notes.html#c4">One block</a></td><td>repeating blocks</td><td>Find the group that repeats (a set, a pair, a block of time or money), count the blocks, then deal with what&#x27;s left over.</td><td><a href="moems-contests.html#2019e2d">20</a></td></tr><tr><td><a href="moems-notes.html#c5">Gaps and posts</a></td><td>time line / posts</td><td>Lengths and waiting times live in the gaps between things, not on the things. In a line there is one gap fewer than posts.</td><td><a href="moems-contests.html#2021m3b">3</a></td></tr><tr><td><a href="moems-notes.html#c6">Same time block</a></td><td>one shared block of time</td><td>When things work at different speeds, pick one block of time they all fit into, count the jobs each does in it, then add (or subtract).</td><td><a href="moems-contests.html#2019e3e">8</a></td></tr><tr><td><a href="moems-notes.html#c7">Draw the shape</a></td><td>the shape, every length labelled</td><td>Draw the shape to scale-ish and write every length on it. Borders and setbacks come off both ends.</td><td><a href="moems-contests.html#2019e3d">67</a></td></tr><tr><td><a href="moems-notes.html#c8">Worst case</a></td><td>the unluckiest run</td><td>&#x27;Guarantee&#x27; means even the unluckiest run works. Build the unluckiest run on purpose, then add one.</td><td><a href="moems-contests.html#2025e5b">1</a></td></tr><tr><td><a href="moems-notes.html#c9">Friendly groups</a></td><td>terms sorted into friendly groups</td><td>Before calculating a long sum or product, look for numbers that make 10, 100 or 1000 together, or a number that repeats. Regroup first, then calculate.</td><td><a href="moems-contests.html#2019e1a">36</a></td></tr><tr><td><a href="moems-notes.html#c10">Cycles and remainders</a></td><td>one block of the cycle</td><td>When something repeats, find one block. Throw away the full blocks; the remainder tells you where you land.</td><td><a href="moems-contests.html#2019e1d">3</a></td></tr><tr><td><a href="moems-notes.html#c11">Digit detective</a></td><td>columns with carries</td><td>Puzzles about digits are solved column by column, starting with the ones, carrying as you go. Divisibility rules let you test a digit without dividing.</td><td><a href="moems-contests.html#2019e1c">64</a></td></tr><tr><td><a href="moems-notes.html#c12">Odd and even</a></td><td>odd numbers marked</td><td>Whether a total is odd or even depends only on how many odd numbers go into it. That one fact can rule out half the possible answers.</td><td><a href="moems-contests.html#2019e2b">4</a></td></tr></tbody></table></section><section class="sheet" id="grading" aria-labelledby="grading-h"><div class="eq" role="math"><span>a closed step</span><span>=</span><span>your method</span><span>+</span><span>the right number</span></div><h2 id="grading-h">How grading works</h2><p>Each problem is split into steps, one number per step. He writes his method in the lined box and types the number (units, $ signs, commas and fractions like 2 1/2 are fine), then presses <b>Check step</b> (<kbd>Enter</kbd> in the answer box, <kbd>Ctrl</kbd>+<kbd>Enter</kbd> in the working box).</p><p>A wrong answer gets a nudge, and the nudges get more specific each time. After three misses he gets one final attempt; if that misses too, the step's answer is handed over and he does the next step himself. <b>Hint for this step</b> opens a hint without using a try (it's noted in My steps). <b>Submit question</b> reports how each step went and opens the verified answer and the picture story once every step is closed. <b>Show worked answer</b> asks twice if some steps haven't been tried.</p><p>On the Contests page each problem is one step (the final answer), checked against the official MOEMS key, and the official method opens afterwards.</p><p>Nothing is saved when the tab closes: progress and ink start fresh each visit.</p></section><section class="sheet" id="pen" aria-labelledby="pen-h"><div class="eq" role="math"><span>P</span><span>=</span><span>pen on/off</span><span>,</span><span>Esc</span><span>=</span><span>pen off</span></div><h2 id="pen-h">The teaching pen</h2><p>Press <kbd>P</kbd> (or the ✎ button) to write on any page. Four inks, three nibs, a highlighter, straight lines, boxes and an eraser; hold <kbd>Shift</kbd> for a straight stroke. <b>Stylus only</b> ignores your palm. On the notes page the ink stays with the text as you scroll; on the workbenches the ink stays with each problem. <b>PNG</b> saves the ink only, not the page underneath.</p></section><section class="sheet" id="about" aria-labelledby="about-h"><div class="eq" role="math"><span>MOEMS</span><span>©</span><span>Mathematical Olympiads for Elementary and Middle Schools</span></div><h2 id="about-h">About the material</h2><p>The problems are copyrighted MOEMS material, and MOEMS's own coaching page says contests, problems and solutions may not be published in any form, including the internet. Keep these files on your own computer and open them from a folder; don't put them on a public web page.</p><p>Diagram pictures from the original pages open only if the <code>source_pages/</code> and <code>images/</code> folders from your ZIP sit next to these files.</p></section></main></div>
+<script>
+/* Sandbox-safe helpers: no storage, no alert/confirm/prompt; hash and history guarded. */
+window.SAFE = (function () {
+  "use strict";
+  function isAbout() { try { return location.protocol === "about:" || location.href === "about:srcdoc"; } catch (e) { return true; } }
+  function getHash() { if (isAbout()) return ""; try { return decodeURIComponent((location.hash || "").slice(1)); } catch (e) { return ""; } }
+  function setHash(h) {
+    if (isAbout()) return false;
+    try { history.replaceState(null, "", "#" + h); return true; }
+    catch (e) { try { location.hash = h; return true; } catch (e2) { return false; } }
+  }
+  return { isAbout, getHash, setHash };
+})();
+
+</script>
+<script>
+/* Step-through story: one picture per frame, Back/Next, progress dots, Show all, ←/→ when focused. */
+window.STORY = (function () {
+  "use strict";
+  function setup(st) {
+    if (st.dataset.ready) return;
+    st.dataset.ready = "1";
+    const frames = Array.from(st.querySelectorAll(":scope .frame"));
+    const dots = st.querySelector(".dots"), back = st.querySelector("[data-act=back]"), next = st.querySelector("[data-act=next]");
+    const all = st.querySelector("input.showall"), name = st.querySelector(".stepname");
+    const marks = Array.from(st.querySelectorAll(".plan-side li[data-s], .plan-strip span[data-s]"));
+    const skipped = new Set(frames.filter((f) => f.classList.contains("skip")).map((f) => f.dataset.step));
+    marks.forEach((m) => m.classList.toggle("skipd", skipped.has(m.dataset.s)));
+    let i = 0;
+    const seen = new Set([0]);
+    frames.forEach((f, k) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("aria-label", "Picture " + (k + 1) + " of " + frames.length);
+      b.addEventListener("click", () => go(k));
+      dots.appendChild(b);
+    });
+    function go(k) { i = Math.max(0, Math.min(frames.length - 1, k)); seen.add(i); render(); }
+    function render() {
+      frames.forEach((f, k) => f.classList.toggle("on", k === i));
+      Array.from(dots.children).forEach((b, k) => { b.classList.toggle("on", k === i); b.classList.toggle("seen", seen.has(k) && k !== i); });
+      back.disabled = i === 0;
+      next.disabled = i === frames.length - 1;
+      const s = frames[i] && frames[i].dataset.step;
+      marks.forEach((m) => m.classList.toggle("on", s && m.dataset.s === s));
+      if (name) name.textContent = s && st.dataset.plan ? JSON.parse(st.dataset.plan)[+s - 1] : "";
+    }
+    back.addEventListener("click", () => go(i - 1));
+    next.addEventListener("click", () => go(i + 1));
+    st.addEventListener("keydown", (e) => {
+      if (e.target.closest("input,textarea,select")) return;
+      if (e.key === "ArrowRight") { go(i + 1); e.preventDefault(); }
+      else if (e.key === "ArrowLeft") { go(i - 1); e.preventDefault(); }
+    });
+    all.addEventListener("change", () => st.classList.toggle("all", all.checked));
+    st._go = go;
+    render();
+  }
+  function init(root) { (root || document).querySelectorAll(".story").forEach(setup); }
+  document.addEventListener("DOMContentLoaded", () => init());
+  return { init };
+})();
+
+</script>
+<script>
+/* Teaching pen.
+   Two viewport-sized canvases: `base` holds committed strokes, `live` holds only the stroke being drawn.
+   While drawing, only the newest segments are painted; old strokes are never redrawn.
+   Reading pages (data-penmode="page"): strokes are stored in page coordinates and stay on the content; a finger scrolls.
+   Workbench pages (data-penmode="viewport"): strokes are viewport-anchored, the pen layer swallows scrolling,
+   and ink is kept per problem through window.INK.get/set. */
+(function () {
+  "use strict";
+  const MODE = document.body.dataset.penmode === "viewport" ? "viewport" : "page";
+  const DPR = Math.min(2, window.devicePixelRatio || 1);
+  const COLORS = [["ink", "#1C2A4A"], ["red", "#C23A2E"], ["blue", "#2D6BD0"], ["green", "#1E7A50"]];
+  const WIDTHS = [2, 3.5, 6];
+  const stats = { framesDrawing: 0, oldRedrawsWhileDrawing: 0, baseRedraws: 0, segmentsPainted: 0 };
+  window.__PEN = { stats, mode: MODE, megapixels: () => 2 * (base.width * base.height) / 1e6, strokes: () => strokes };
+
+  const base = document.createElement("canvas"), live = document.createElement("canvas");
+  base.className = "pen-canvas base"; live.className = "pen-canvas live";
+  base.setAttribute("aria-hidden", "true"); live.setAttribute("aria-hidden", "true");
+  const bctx = base.getContext("2d"), lctx = live.getContext("2d");
+  let strokes = [], undoStack = [], redoStack = [];
+  let on = false, tool = "pen", color = COLORS[0][1], widthIdx = 1, stylusOnly = false;
+  let drawing = null, raf = 0, scrollRaf = 0;
+
+  function off() { return MODE === "page" ? [window.scrollX, window.scrollY] : [0, 0]; }
+  function size() {
+    for (const c of [base, live]) {
+      c.width = Math.round(window.innerWidth * DPR);
+      c.height = Math.round(window.innerHeight * DPR);
+      c.style.width = window.innerWidth + "px";
+      c.style.height = window.innerHeight + "px";
+      c.getContext("2d").setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    redrawBase();
+  }
+
+  /* ---- drawing primitives ---- */
+  function style(ctx, s) {
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.strokeStyle = s.color;
+    ctx.globalAlpha = s.tool === "marker" ? 0.32 : 1;
+  }
+  function seg(ctx, s, k, ox, oy) {
+    // smoothed segment k: from mid(k-2,k-1) to mid(k-1,k) with control point k-1
+    const p = s.pts;
+    const a = p[k - 2] || p[k - 1], b = p[k - 1], c = p[k];
+    const m1x = (a[0] + b[0]) / 2 - ox, m1y = (a[1] + b[1]) / 2 - oy, m2x = (b[0] + c[0]) / 2 - ox, m2y = (b[1] + c[1]) / 2 - oy;
+    ctx.lineWidth = b[2];
+    ctx.beginPath(); ctx.moveTo(m1x, m1y); ctx.quadraticCurveTo(b[0] - ox, b[1] - oy, m2x, m2y); ctx.stroke();
+    stats.segmentsPainted++;
+  }
+  function drawShape(ctx, s, ox, oy) {
+    style(ctx, s);
+    if (s.tool === "line" || s.snapped) {
+      const a = s.pts[0], b = s.pts[s.pts.length - 1];
+      ctx.lineWidth = s.w; ctx.beginPath(); ctx.moveTo(a[0] - ox, a[1] - oy); ctx.lineTo(b[0] - ox, b[1] - oy); ctx.stroke();
+    } else if (s.tool === "box") {
+      const a = s.pts[0], b = s.pts[s.pts.length - 1];
+      ctx.lineWidth = s.w; ctx.strokeRect(Math.min(a[0], b[0]) - ox, Math.min(a[1], b[1]) - oy, Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]));
+    } else if (s.tool === "marker") {
+      // translucent: draw as one path so overlaps inside the stroke don't darken
+      ctx.lineWidth = s.w; ctx.beginPath();
+      const p = s.pts; ctx.moveTo(p[0][0] - ox, p[0][1] - oy);
+      for (let k = 1; k < p.length; k++) { const mx = (p[k - 1][0] + p[k][0]) / 2 - ox, my = (p[k - 1][1] + p[k][1]) / 2 - oy; ctx.quadraticCurveTo(p[k - 1][0] - ox, p[k - 1][1] - oy, mx, my); }
+      ctx.stroke();
+    } else {
+      if (s.pts.length === 1) { ctx.lineWidth = s.pts[0][2]; ctx.beginPath(); ctx.arc(s.pts[0][0] - ox, s.pts[0][1] - oy, s.pts[0][2] / 2, 0, 7); ctx.fillStyle = s.color; ctx.fill(); }
+      for (let k = 1; k < s.pts.length; k++) seg(ctx, s, k, ox, oy);
+    }
+    ctx.globalAlpha = 1;
+  }
+  function redrawBase() {
+    if (drawing) stats.oldRedrawsWhileDrawing++;
+    stats.baseRedraws++;
+    bctx.clearRect(0, 0, base.width, base.height);
+    const [ox, oy] = off();
+    for (const s of strokes) drawShape(bctx, s, ox, oy);
+  }
+
+  /* ---- pointer handling ---- */
+  function accept(e) {
+    if (!on) return false;
+    if (e.pointerType === "touch" && (stylusOnly || MODE === "page")) return false; // palm rejection / finger scrolls
+    return true;
+  }
+  function pt(e, prev) {
+    const [ox, oy] = off();
+    const x = e.clientX + ox, y = e.clientY + oy, t = e.timeStamp || performance.now();
+    const baseW = WIDTHS[widthIdx] * (tool === "marker" ? 4 : 1);
+    let w = baseW;
+    if (prev && tool === "pen") {
+      const dt = Math.max(1, t - prev[3]), v = Math.hypot(x - prev[0], y - prev[1]) / dt;
+      const target = baseW * Math.max(0.45, Math.min(1.25, 1.25 - v * 0.35));
+      w = prev[2] * 0.7 + target * 0.3;
+    }
+    return [x, y, w, t];
+  }
+  function down(e) {
+    if (!accept(e)) return;
+    e.preventDefault();
+    try { live.setPointerCapture(e.pointerId); } catch (_) {}
+    if (tool === "eraser") { drawing = { tool: "eraser", removed: [] }; eraseAt(e); return; }
+    const p = pt(e, null);
+    drawing = { tool, color, w: WIDTHS[widthIdx] * (tool === "marker" ? 4 : 1), pts: [p], drawn: 1, snapped: false };
+    schedule();
+  }
+  function move(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    if (drawing.tool === "eraser") { eraseAt(e); return; }
+    const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    for (const ev of evs.length ? evs : [e]) drawing.pts.push(pt(ev, drawing.pts[drawing.pts.length - 1]));
+    drawing.snapped = (drawing.tool === "pen" || drawing.tool === "marker") && e.shiftKey;
+    schedule();
+  }
+  function up(e) {
+    if (!drawing) return;
+    if (drawing.tool === "eraser") {
+      if (drawing.removed.length) { undoStack.push({ type: "erase", items: drawing.removed }); redoStack = []; }
+      drawing = null; persist(); return;
+    }
+    cancelAnimationFrame(raf); raf = 0;
+    const s = drawing; drawing = null;
+    delete s.drawn;
+    if ((s.tool === "line" || s.tool === "box" || s.snapped) && s.pts.length > 1) s.pts = [s.pts[0], s.pts[s.pts.length - 1]];
+    strokes.push(s);
+    undoStack.push({ type: "add", stroke: s }); redoStack = [];
+    lctx.clearRect(0, 0, live.width, live.height);
+    const [ox, oy] = off();
+    drawShape(bctx, s, ox, oy);           // commit: paint only the new stroke onto the base layer
+    persist();
+  }
+  function schedule() { if (!raf) raf = requestAnimationFrame(frame); }
+  function frame() {
+    raf = 0;
+    if (!drawing) return;
+    stats.framesDrawing++;
+    const s = drawing, [ox, oy] = off();
+    if (s.tool === "pen" && !s.snapped) {
+      style(lctx, s);
+      for (let k = Math.max(1, s.drawn); k < s.pts.length; k++) seg(lctx, s, k, ox, oy);   // only new points
+      s.drawn = s.pts.length;
+    } else {
+      // marker, line, box, shift-snapped: the live layer shows just this one shape
+      lctx.clearRect(0, 0, live.width, live.height);
+      drawShape(lctx, s, ox, oy);
+      if (s.tool === "pen") s.drawn = 1;
+    }
+  }
+  function eraseAt(e) {
+    const [ox, oy] = off();
+    const x = e.clientX + ox, y = e.clientY + oy;
+    let hit = false;
+    for (let i = strokes.length - 1; i >= 0; i--) {
+      const s = strokes[i];
+      const near = s.pts.some((p) => Math.hypot(p[0] - x, p[1] - y) < 12) ||
+        ((s.tool === "line" || s.tool === "box" || s.snapped) && nearShape(s, x, y));
+      if (near) { drawing.removed.push({ stroke: s, index: i }); strokes.splice(i, 1); hit = true; }
+    }
+    if (hit) { const d = drawing; drawing = null; redrawBase(); drawing = d; }
+  }
+  function nearShape(s, x, y) {
+    const a = s.pts[0], b = s.pts[s.pts.length - 1];
+    const segs = s.tool === "box" ? [[a[0], a[1], b[0], a[1]], [b[0], a[1], b[0], b[1]], [b[0], b[1], a[0], b[1]], [a[0], b[1], a[0], a[1]]] : [[a[0], a[1], b[0], b[1]]];
+    return segs.some(([x1, y1, x2, y2]) => {
+      const L = Math.hypot(x2 - x1, y2 - y1) || 1, t = Math.max(0, Math.min(1, ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / (L * L)));
+      return Math.hypot(x - (x1 + t * (x2 - x1)), y - (y1 + t * (y2 - y1))) < 10;
+    });
+  }
+
+  /* ---- history ---- */
+  function undo() {
+    const a = undoStack.pop(); if (!a) return;
+    if (a.type === "add") strokes.splice(strokes.lastIndexOf(a.stroke), 1);
+    else if (a.type === "erase") a.items.slice().reverse().forEach((it) => strokes.splice(it.index, 0, it.stroke));
+    else if (a.type === "clear") strokes = a.items.slice();
+    redoStack.push(a); redrawBase(); persist();
+  }
+  function redo() {
+    const a = redoStack.pop(); if (!a) return;
+    if (a.type === "add") strokes.push(a.stroke);
+    else if (a.type === "erase") a.items.forEach((it) => { const i = strokes.indexOf(it.stroke); if (i >= 0) strokes.splice(i, 1); });
+    else if (a.type === "clear") strokes = [];
+    undoStack.push(a); redrawBase(); persist();
+  }
+  function clearAll() {
+    if (!strokes.length) return;
+    undoStack.push({ type: "clear", items: strokes.slice() }); redoStack = [];
+    strokes = []; redrawBase(); persist();
+  }
+  function exportPng() {
+    try {
+      const a = document.createElement("a");
+      a.href = base.toDataURL("image/png");
+      a.download = "ink.png";
+      document.body.appendChild(a); a.click(); a.remove();
+      note("Saved the ink only (not the page underneath).");
+    } catch (err) { note("Export isn't allowed here."); }
+  }
+
+  /* ---- per-problem ink (workbench) ---- */
+  let problemId = null;
+  function persist() { if (MODE === "viewport" && problemId && window.INK) window.INK.set(problemId, strokes.slice()); }
+  document.addEventListener("bench:problem", (e) => {
+    if (MODE !== "viewport") return;
+    if (e.detail.from && window.INK) window.INK.set(e.detail.from, strokes.slice());
+    problemId = e.detail.to;
+    strokes = window.INK ? window.INK.get(problemId).slice() : [];
+    undoStack = []; redoStack = [];
+    redrawBase();
+  });
+
+  /* ---- toolbar ---- */
+  const bar = document.createElement("div");
+  bar.className = "pen-bar"; bar.setAttribute("role", "toolbar"); bar.setAttribute("aria-label", "Teaching pen");
+  const btn = (label, title, fn, pressed) => {
+    const b = document.createElement("button"); b.type = "button"; b.innerHTML = label; b.title = title; b.setAttribute("aria-label", title);
+    if (pressed !== undefined) b.setAttribute("aria-pressed", String(pressed));
+    b.addEventListener("click", fn); return b;
+  };
+  const toggle = btn("✎ Pen", "Pen on/off (P)", () => setOn(!on), false);
+  const tools = document.createElement("div"); tools.className = "tools";
+  const toolBtns = {};
+  [["pen", "✎", "Pen"], ["marker", "▬", "Marker"], ["line", "╱", "Straight line"], ["box", "▭", "Box"], ["eraser", "⌫", "Eraser"]].forEach(([k, g, t]) => {
+    toolBtns[k] = btn(g, t, () => setTool(k), k === tool); tools.appendChild(toolBtns[k]);
+  });
+  tools.appendChild(Object.assign(document.createElement("span"), { className: "sep" }));
+  const colBtns = COLORS.map(([n, c], i) => { const b = btn('<span class="sw" style="background:' + c + '"></span>', n + " ink", () => setColor(i), i === 0); tools.appendChild(b); return b; });
+  tools.appendChild(Object.assign(document.createElement("span"), { className: "sep" }));
+  const wBtns = WIDTHS.map((w, i) => { const b = btn(["thin", "medium", "thick"][i][0].toUpperCase(), ["Thin", "Medium", "Thick"][i] + " nib", () => setWidth(i), i === widthIdx); tools.appendChild(b); return b; });
+  tools.appendChild(Object.assign(document.createElement("span"), { className: "sep" }));
+  tools.appendChild(btn("↶", "Undo", undo)); tools.appendChild(btn("↷", "Redo", redo)); tools.appendChild(btn("Clear", "Clear all ink (undoable)", clearAll));
+  tools.appendChild(btn("PNG", "Export the ink only as a PNG image (not the page)", exportPng));
+  const stylusBtn = btn("Stylus only", "Ignore finger touches (palm rejection)", () => { stylusOnly = !stylusOnly; stylusBtn.setAttribute("aria-pressed", String(stylusOnly)); }, false);
+  tools.appendChild(stylusBtn);
+  const noteEl = document.createElement("span"); noteEl.className = "note"; noteEl.setAttribute("aria-live", "polite");
+  tools.appendChild(noteEl);
+  bar.appendChild(toggle); bar.appendChild(tools);
+  function note(t) { noteEl.textContent = t; }
+  function setOn(v) {
+    on = v;
+    toggle.setAttribute("aria-pressed", String(on));
+    bar.classList.toggle("open", on);
+    live.classList.toggle("active", on);
+    live.classList.toggle(MODE === "page" ? "touchpass" : "swallow", on);
+    note(on ? (MODE === "page" ? "Ink stays on the page; a finger scrolls." : "Ink stays with this problem.") : "");
+  }
+  function setTool(k) { tool = k; Object.entries(toolBtns).forEach(([n, b]) => b.setAttribute("aria-pressed", String(n === k))); }
+  function setColor(i) { color = COLORS[i][1]; colBtns.forEach((b, j) => b.setAttribute("aria-pressed", String(i === j))); }
+  function setWidth(i) { widthIdx = i; wBtns.forEach((b, j) => b.setAttribute("aria-pressed", String(i === j))); }
+
+  /* ---- wiring ---- */
+  function typing(e) { const t = e.target; return !!(t && t.closest && t.closest("input,textarea,select,[contenteditable=true]")); }
+  document.addEventListener("keydown", (e) => {
+    if (typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === "p" || e.key === "P") { setOn(!on); e.preventDefault(); }
+    else if (e.key === "Escape" && on) setOn(false);
+  });
+  live.addEventListener("pointerdown", down);
+  live.addEventListener("pointermove", move);
+  live.addEventListener("pointerup", up);
+  live.addEventListener("pointercancel", up);
+  if (MODE === "page") {
+    window.addEventListener("scroll", () => { if (!scrollRaf) scrollRaf = requestAnimationFrame(() => { scrollRaf = 0; redrawBase(); }); }, { passive: true });
+    // wheel over the active pen layer still scrolls the page
+    live.addEventListener("wheel", (e) => { window.scrollBy(e.deltaX, e.deltaY); }, { passive: true });
+  } else {
+    live.addEventListener("wheel", (e) => { if (on) e.preventDefault(); }, { passive: false });
+  }
+  window.addEventListener("resize", size);
+  document.addEventListener("DOMContentLoaded", () => {
+    document.body.appendChild(base); document.body.appendChild(live); document.body.appendChild(bar);
+    size();
+  });
+  window.PEN = { setOn, setTool, setColor, setWidth, undo, redo, clearAll, exportPng, isOn: () => on, setStylusOnly: (v) => { stylusOnly = v; stylusBtn.setAttribute("aria-pressed", String(v)); } };
+})();
+
+</script>
+</body></html>
